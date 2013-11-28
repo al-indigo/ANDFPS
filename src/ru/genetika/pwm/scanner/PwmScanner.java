@@ -1,5 +1,6 @@
 package ru.genetika.pwm.scanner;
 
+import ru.genetika.common.Alphabet;
 import ru.genetika.pwm.Pwm;
 
 public abstract class PwmScanner {
@@ -33,5 +34,5 @@ public abstract class PwmScanner {
 
 	public abstract void scan();
 
-  public void prepare() { }
+  public void prepare(Alphabet alphabet) { }
 }

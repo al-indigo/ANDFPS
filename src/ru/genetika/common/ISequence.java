@@ -2,8 +2,14 @@ package ru.genetika.common;
 
 public interface ISequence {
 
-	public abstract String getName();
+	public String getName();
 
-	public abstract Object getSequence();
+	//public Object getSequence();
 
+	public int getLength();
+
+	/**
+	 * Get the i'th element of the sequence (zero-based).
+	 */
+	public ISequenceElement get(int i);
 }

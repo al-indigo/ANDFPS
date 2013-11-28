@@ -1,6 +1,12 @@
 package org.arabidopsis.ahocorasick;
 
 import java.util.Iterator;
+import java.util.Set;
+
+import ru.genetika.common.Alphabet;
+import ru.genetika.common.ByteSequence;
+import ru.genetika.common.ISequence;
+import ru.genetika.common.ISequenceElement;
 
 
 /**
@@ -32,10 +38,9 @@ public class AhoCorasick {
     private boolean prepared;
 
     public AhoCorasick() {
-	this.root = new State(0);
-	this.prepared = false;
+    	this.root = new State(0);
+    	this.prepared = false;
     }
-
 
 
     /**
@@ -44,38 +49,31 @@ public class AhoCorasick {
        elements in SearchResults.getOutputs().
      */
     public void add(byte[] keyword, Object output) {
-	if (this.prepared)
-	    throw new IllegalStateException
-		("can't add keywords after prepare() is called");
-	State lastState = this.root.extendAll(keyword);
-	lastState.addOutput(output);
+    	if (prepared)	{
+    		throw new IllegalStateException("can't add keywords after prepare() is called");
+    	}
+    	//State lastState = this.root.extendAll(keyword);
+    	State lastState = root.extendAll(new ByteSequence(keyword));
+    	lastState.addOutput(output);
     }
-
 
 
     /**
        Prepares the automaton for searching.  This must be called
        before any searching().
      */
-    public void prepare() {
-	this.prepareFailTransitions();
-	this.prepared = true;
+    public void prepare(Alphabet alphabet) {
+    	this.prepareFailTransitions(alphabet);
+    	this.prepared = true;
     }
-
-
 
 
     /**
        Starts a new search, and returns an Iterator of SearchResults.
      */
-    public Iterator search(byte[] bytes) {
-	return new Searcher(this, this.startSearch(bytes));
+    public Iterator search(ISequence sequence)	{	//byte[] bytes) {
+    	return new Searcher(this, this.startSearch(sequence));	//bytes));
     }
-
-
-
-
-
 
 
 
@@ -83,39 +81,79 @@ public class AhoCorasick {
 	dependent.  Initializes the fail transitions of all states
 	except for the root.
     */
-    private void prepareFailTransitions() {
-	Queue q = new Queue();
-	for(int i = 0; i < 256; i++)
-	    if (this.root.get((byte) i) != null) {
-		this.root.get((byte) i).setFail(this.root);
-		q.add(this.root.get((byte) i));
-	    }
-	this.prepareRoot();
-	while (! q.isEmpty()) {
-	    State state = q.pop();
-	    byte[] keys = state.keys();
-	    for (int i = 0; i < keys.length; i++) {
-		State r = state;
-		byte a = keys[i];
-		State s = r.get(a);
-		q.add(s);
-		r = r.getFail();
-		while (r.get(a) == null)
-		    r = r.getFail();
-		s.setFail(r.get(a));
-		s.getOutputs().addAll(r.get(a).getOutputs());
-	    }
-	}
+    /*private void prepareFailTransitions() {
+    	Queue q = new Queue();
+    	for(int i = 0; i < 256; i++)	{
+    		if (root.get((byte) i) != null) {
+    			root.get((byte) i).setFail(root);
+    			q.add(root.get((byte) i));
+    		}
+    	}
+
+    	this.prepareRoot();
+
+    	while (! q.isEmpty()) {
+    		State state = q.pop();
+    		byte[] keys = state.keys();
+    		for (int i = 0; i < keys.length; i++) {
+    			State r = state;
+    			byte a = keys[i];
+    			State s = r.get(a);
+    			q.add(s);
+    			r = r.getFail();
+    			while (r.get(a) == null)	{
+    				r = r.getFail();
+    			}
+    			s.setFail(r.get(a));
+    			s.getOutputs().addAll(r.get(a).getOutputs());
+    		}
+    	}
+    }*/
+    private void prepareFailTransitions(Alphabet alphabet) {
+    	Queue q = new Queue();
+    	for (ISequenceElement letter : alphabet)	{
+    		if (root.hasEdge(letter)) {
+    			root.get(letter).setFail(root);
+    			q.add(root.get(letter));
+    		}
+    	}
+
+    	this.prepareRoot(alphabet);
+
+    	while (!q.isEmpty())	{
+    		State state = q.pop();
+    		Set<ISequenceElement> keys = state.keys();
+    		for (ISequenceElement key : keys) {
+    			State r = state;
+    			State s = r.get(key);
+    			q.add(s);
+    			r = r.getFail();
+    			while (!r.hasEdge(key))	{
+    				r = r.getFail();
+    			}
+
+    			r = r.get(key);
+    			s.setFail(r);
+    			s.getOutputs().addAll(r.getOutputs());
+    		}
+    	}
     }
 
 
     /** Sets all the out transitions of the root to itself, if no
 	transition yet exists at this point.
     */
-    private void prepareRoot() {
-	for(int i = 0; i < 256; i++)
-	    if (this.root.get((byte) i) == null)
-		this.root.put((byte) i, this.root);
+    /*private void prepareRoot() {
+    	for(int i = 0; i < 256; i++)
+    		if (root.get((byte) i) == null)
+    			root.put((byte) i, root);
+    }*/
+    private void prepareRoot(Alphabet alphabet) {
+    	for (ISequenceElement letter : alphabet)	{
+    		if (!root.hasEdge(letter))	{
+    			root.put(letter, root);
+    		}
+    	}
     }
 
 
@@ -125,7 +163,7 @@ public class AhoCorasick {
        user probably shouldn't touch this.
      */
     State getRoot() {
-	return this.root;
+    	return root;
     }
 
     
@@ -133,12 +171,13 @@ public class AhoCorasick {
     /**
        Begins a new search using the raw interface.  Package protected.
      */
-    SearchResult startSearch(byte[] bytes) {
-	if (! this.prepared)
-	    throw new IllegalStateException
-		("can't start search until prepare()");
-	return continueSearch
-	    (new SearchResult(this.root, bytes, 0));
+    private SearchResult startSearch(ISequence sequence)	{	//byte[] bytes) {byte[] bytes) {
+    	if (!prepared)	{
+    		throw new IllegalStateException("can't start search until prepare()");
+    	}
+
+    	//return continueSearch(new SearchResult(this.root, bytes, 0));
+    	return continueSearch(new SearchResult(root, sequence, 0));
     }
 
 
@@ -148,20 +187,36 @@ public class AhoCorasick {
        lastResult.  Package protected.
        Modification: also stop search when character == >>\0<<
      */
+    /*SearchResult continueSearch(SearchResult lastResult) {
+    	byte[] bytes = lastResult.bytes;
+    	State state = lastResult.getLastMatchedState();
+    	for (int i = lastResult.getLastIndex() ; i < sequence.getLength() && bytes[i] != (byte)'\0' ; i++) {
+    		byte b = bytes[i];
+    		while (state.get(b) == null)	{
+    			state = state.getFail();
+    		}
+    		state = state.get(b);
+
+    		if (state.getOutputs().size() > 0)	{
+    			return new SearchResult(state, sequence, i+1);
+    		}
+    	}
+    	return null;
+    }*/
     SearchResult continueSearch(SearchResult lastResult) {
-	byte[] bytes = lastResult.bytes;
-	State state = lastResult.lastMatchedState;
-	for (int i = lastResult.lastIndex; i < bytes.length && bytes[i] != (byte)'\0'; i++) {
-	    byte b = bytes[i];
-	    while (state.get(b) == null)
-		state = state.getFail();
-	    state = state.get(b);
-	    if (state.getOutputs().size() > 0)
-		return new SearchResult(state, bytes, i+1);
-	}
-	return null;
+    	ISequence sequence = lastResult.getSequence();
+    	State state = lastResult.getLastMatchedState();
+    	for (int i = lastResult.getLastIndex() ; i < sequence.getLength() && !sequence.get(i).equals('\0') ; i++) {
+    		ISequenceElement element = sequence.get(i);
+    		while (!state.hasEdge(element))	{
+    			state = state.getFail();
+    		}
+    		state = state.get(element);
+
+    		if (state.getOutputs().size() > 0)	{
+    			return new SearchResult(state, sequence, i+1);
+    		}
+    	}
+    	return null;
     }
-
-
-
 }
