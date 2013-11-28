@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
 import java.util.Vector;
+import java.util.Iterator;
 
 /**
  * !!!!DNA only!!!!
