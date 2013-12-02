@@ -4,7 +4,8 @@ package ru.genetika.common;
 public class ByteSequence implements ISequence {
 	private String name = null;
 	// private byte[] seq = null;
-	private ByteSequenceElement[] sequence = null;
+	//private ByteSequenceElement[] sequence = null;
+	private byte[] sequence = null;
 
 	public ByteSequence(String name, byte[] bytesequence) {
 		this(bytesequence);
@@ -13,10 +14,11 @@ public class ByteSequence implements ISequence {
 
 	public ByteSequence(byte[] bytesequence) {
 		// this.seq = seq;
-		sequence = new ByteSequenceElement[bytesequence.length];
+		/*sequence = new ByteSequenceElement[bytesequence.length];
 		for (int i = 0; i < bytesequence.length; i++) {
 			sequence[i] = new ByteSequenceElement(bytesequence[i]);
-		}
+		}*/
+		sequence = bytesequence;
 	}
 
 	public ByteSequence(String string) {
@@ -28,9 +30,13 @@ public class ByteSequence implements ISequence {
 		 * i++) { seq[i] = (byte)string.charAt(i); } this.seq = seq;
 		 */
 
-		sequence = new ByteSequenceElement[string.length()];
+		/*sequence = new ByteSequenceElement[string.length()];
 		for (int i = 0; i < string.length(); i++) {
 			sequence[i] = new ByteSequenceElement((byte) string.charAt(i));
+		}*/
+		sequence = new byte[string.length()];
+		for (int i = 0; i < string.length(); i++) {
+			sequence[i] = (byte)string.charAt(i);
 		}
 	}
 
@@ -50,7 +56,8 @@ public class ByteSequence implements ISequence {
 	@Override
 	public ISequenceElement get(int i) {
 		if (i < sequence.length) {
-			return sequence[i];
+			//return sequence[i];
+			return Alphabet.getLetter(sequence[i]);
 		}
 
 		return null;

@@ -7,9 +7,22 @@ public class ByteSequenceElement implements ISequenceElement {
 		this.b = b;
 	}
 
+
+	@Override
 	public boolean equals(char c)	{
 		return b == (byte)c;
 	}
+
+	@Override
+	public byte byteValue() {
+		return b;
+	}
+
+	@Override
+	public int intValue() {
+		return b;
+	}
+
 
 	/**
 	 * Overrides the default equals() method.
