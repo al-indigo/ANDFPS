@@ -1,5 +1,6 @@
 package ru.genetika;// import java.io.BufferedWriter;
 
+import ru.genetika.common.Alphabet;
 import ru.genetika.common.ByteSequence;
 import ru.genetika.common.CharSequence;
 import ru.genetika.pwm.Pwm;
@@ -30,7 +31,7 @@ public class ANDFPS {
     scanner.setPwm(matrix);
     scanner.setMinThreshold(threshold);
     scanner.setResultListener(new ResultPrinter());
-    scanner.prepare();
+    scanner.prepare(new Alphabet());
     System.out.println("preparation finished successfully; starting scan");
 
     for (int i = 0; i < sequences.length; i++) {

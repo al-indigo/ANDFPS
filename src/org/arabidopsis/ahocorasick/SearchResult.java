@@ -2,6 +2,8 @@ package org.arabidopsis.ahocorasick;
 
 import java.util.List;
 
+import ru.genetika.common.ISequence;
+
 
 /**
    <p>Holds the result of the search so far.  Includes the outputs where
@@ -11,30 +13,43 @@ import java.util.List;
    search, though this is not exposed for public use.)</p>
  */
 public class SearchResult {
-    State lastMatchedState;
-    byte[] bytes;
-    int lastIndex;
+	private State lastMatchedState;
+	//byte[] bytes;
+	private ISequence sequence;
+	private int lastIndex;
 
-    SearchResult(State s, byte[] bs, int i) {
-	this.lastMatchedState = s;
-	this.bytes = bs;
-	this.lastIndex = i;
-    }
-
-
-    /**
-       Returns a list of the outputs of this match.
-     */
-    public List getOutputs() {
-	return lastMatchedState.getOutputs();
-    }
+	/*SearchResult(State s, byte[] bs, int i) {
+		this.lastMatchedState = s;
+		this.bytes = bs;
+		this.lastIndex = i;
+	}*/
+	public SearchResult(State s, ISequence sequence, int i) {
+		this.lastMatchedState = s;
+		this.sequence = sequence;
+		this.lastIndex = i;
+	}
 
 
-    /**
-       Returns the index where the search terminates.  Note that this
-       is one byte after the last matching character.
-     */
-    public int getLastIndex() {
-	return lastIndex;
-    }
+	public State getLastMatchedState()	{
+		return lastMatchedState;
+	}
+
+	/**
+   	  Returns a list of the outputs of this match.
+	 */
+	public List getOutputs() {
+		return lastMatchedState.getOutputs();
+	}
+
+	public ISequence getSequence()	{
+		return sequence;
+	}
+
+	/**
+	  Returns the index where the search terminates.  Note that this
+	  is one byte after the last matching character.
+	 */
+	public int getLastIndex() {
+		return lastIndex;
+	}
 }

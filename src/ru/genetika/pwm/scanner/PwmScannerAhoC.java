@@ -2,7 +2,10 @@ package ru.genetika.pwm.scanner;
 
 import org.arabidopsis.ahocorasick.AhoCorasick;
 import org.arabidopsis.ahocorasick.SearchResult;
+
+import ru.genetika.common.Alphabet;
 import ru.genetika.common.ByteSequence;
+import ru.genetika.common.ISequence;
 import ru.genetika.pwm.Pwm;
 import ru.genetika.pwm.utilities.IPwmWordListener;
 import ru.genetika.pwm.utilities.Word;
@@ -12,7 +15,8 @@ import java.util.Iterator;
 
 public class PwmScannerAhoC extends PwmScanner implements IPwmWordListener {
 
-	byte[] sequence = null;
+	//byte[] sequence = null;
+	ISequence sequence = null;
 	boolean changed = false;
 	AhoCorasick ahoC = null;
 	
@@ -29,21 +33,20 @@ public class PwmScannerAhoC extends PwmScanner implements IPwmWordListener {
 	}
 	
 	public void setSequence(ByteSequence sequence) {
-		this.sequence = sequence.getSequence();
+		this.sequence = sequence;//.getSequence();
 	}
 
-  public void prepare() {
-    if(changed)
-		{
+	public void prepare(Alphabet alphabet) {
+		if (changed)	{
 			ahoC = new AhoCorasick();
 			PwmWordGenerator wordGenerator = new PwmWordGenerator(pwmFw);
 			wordGenerator.setThreshold(minThreshold);
 			wordGenerator.setListener(this);
 			wordGenerator.generateWords();
-			ahoC.prepare();
+			ahoC.prepare(alphabet);
 			changed = false;
 		}
-  }
+	}
 
 	@Override
 	public void scan() {
