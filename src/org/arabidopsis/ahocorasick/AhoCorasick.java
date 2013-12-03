@@ -1,7 +1,7 @@
 package org.arabidopsis.ahocorasick;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 
 import ru.genetika.common.Alphabet;
 import ru.genetika.common.ByteSequence;
@@ -122,7 +122,7 @@ public class AhoCorasick {
 
     	while (!q.isEmpty())	{
     		State state = q.pop();
-    		Set<ISequenceElement> keys = state.keys();
+    		Collection<ISequenceElement> keys = state.keys();
     		for (ISequenceElement key : keys) {
     			State r = state;
     			State s = r.get(key);

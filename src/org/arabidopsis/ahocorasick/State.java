@@ -1,11 +1,8 @@
 package org.arabidopsis.ahocorasick;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.Collection;
+import java.util.List;
 
 import ru.genetika.common.ISequence;
 import ru.genetika.common.ISequenceElement;
@@ -24,20 +21,20 @@ class State {
 	private static final int THRESHOLD_TO_USE_SPARSE = 3;
 
 	private int depth;
-	//private EdgeList edgeList;
 	private State fail;
 	private List outputs;
-	private Map<ISequenceElement, State> edges;
+	//private Map<ISequenceElement, State> edges;
+	private ILabeledEdgesList edges;
 
 	public State(int depth) {
 		this.depth = depth;
-		/*if (depth > THRESHOLD_TO_USE_SPARSE)	{
-			this.edgeList = new SparseEdgeList();
+		if (depth > THRESHOLD_TO_USE_SPARSE)	{
+			edges = new SparseEdgeList();
 		}
 		else	{
-			this.edgeList = new DenseEdgeList();
-		}*/
-		edges = new HashMap<ISequenceElement, State>();
+			edges = new DenseEdgeList();
+		}
+		//edges = new HashMap<ISequenceElement, State>();
 		//edges = new TreeMap<ISequenceElement, State>();
 
 		this.fail = null;
@@ -56,8 +53,12 @@ class State {
 		return nextState;
 	}*/
 	public State extend(ISequenceElement e) {
-		if (edges.containsKey(e))	{
+		/*if (edges.containsKey(e))	{
 			return edges.get(e);
+		}*/
+		State s = edges.get(e);
+		if (s != null)	{
+			return s;
 		}
 
 		State nextState = new State(depth + 1);
@@ -81,8 +82,13 @@ class State {
 		State state = this;
 		for (int i = 0 ; i < sequence.getLength() ; i++) {
 			ISequenceElement element = sequence.get(i);
-			if (state.edges.containsKey(element))	{
+
+			/*if (state.edges.containsKey(element))	{
 				state = state.edges.get(element);
+			}*/
+			State linkedState = state.edges.get(element);
+			if (linkedState != null)	{
+				state = linkedState;
 			}
 			else	{
 				state = state.extend(element);
@@ -107,7 +113,7 @@ class State {
 		return result;
 	}*/
 	public int size() {
-		Set<ISequenceElement> keys = edges.keySet();
+		Collection<ISequenceElement> keys = edges.keys();
 		int result = 1;
 		for (ISequenceElement key : keys)	{
 			result += edges.get(key).size();
@@ -120,7 +126,8 @@ class State {
 	 * Tells whether there're edges from this state to other states of automaton labeled with <code>e</code>.
 	 */
 	public boolean hasEdge(ISequenceElement e)	{
-		return edges.containsKey(e);
+		//return edges.containsKey(e);
+		return edges.get(e) != null;
 	}
 
 	/*public State get(byte b) {
@@ -140,8 +147,8 @@ class State {
 	/*public byte[] keys() {
 		return this.edgeList.keys();
 	}*/
-	public Set<ISequenceElement> keys() {
-		return edges.keySet();
+	public Collection<ISequenceElement> keys() {
+		return edges.keys();
 	}
 
 
